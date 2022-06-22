@@ -1,36 +1,55 @@
-import React from "react";
-import api from './API';
-import { useEffect, useState } from "react";
-import { Line } from "react-chartjs-2";
+import React, { useEffect, useState } from "react";
+import Chart from "react-apexcharts";
 import './chart.css';
 
-export default function ChartTest() {
-    const [ dataChart, setDataChart ] = useState ( {} );
+const ChartTest = () => {
+    const [averageTemp, setAverageTemp] = useState([]);
+  const [date, setDate] = useState([]);
+
   useEffect(() => {
-      const fetchData = async () => {
-        let confirmedCases = [];
-        let dateOfCases = [];
-        await api.get('dayone/country/brazil/status/confirmed')
-          .then ( response => {
-            for ( let dataObj of response.data ) {
-              confirmedCases.push(parseInt(dataObj.Cases));
-              let tempDate = new Date (dataObj.Date);
-              dateOfCases.push(tempDate.getUTCDate());
-            }
-        }); 
-        setDataChart({ 
-          labels: dateOfCases, 
-          datasets: [{ 
-            label: 'Confirmed cases', 
-            data: confirmedCases 
-          }]
-        });
-      fetchData();
+    const getData = async () => {
+    const url = 'http://localhost:8000/temperature';
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      console.log(data);
+      setAverageTemp(data?.map((item) => item.average_temp));
+      setDate(data?.map((item) => item.date));
+    } catch (error) {
+        console.log(error);
     }
-    }, []);
-    return( 
-      
-        <Line data={ dataChart }/>
-      
-    )
+  };
+    getData();
+  }, []);
+
+ const series = [ //data on the y-axis
+    {
+      name: "Temperature in Celsius",
+      data: averageTemp
+    }
+  ];
+  const options = { //data on the x-axis
+  chart: { id: 'bar-chart'},
+  xaxis: {
+    categories: date
   }
+};
+return (
+    <div>
+      <Chart
+        options={options}
+        series={series}
+        type="bar"
+        width="450"
+      />
+      <Chart
+        options={options}
+        series={series}
+        type="line"
+        width="450"
+      />
+    </div>
+  )
+}
+
+export default ChartTest;

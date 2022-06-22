@@ -6,8 +6,7 @@ import ChartTest from './assets/Chart';
 function App() {
   return (
     <div>
-      <p>ola</p>
-      <ChartTest/>
+      <ChartTest />
     </div>
     
   );
